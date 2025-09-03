@@ -329,17 +329,18 @@ class Querys:
             self.db.close()
 
     # Query para guardar el seguimiento de la cotización.
-    def guardar_seguimiento(self, data: dict):
+    def guardar_seguimiento(self, data: dict, data_segui_coti_id: int = None):
         try:
 
             flag = data["flag"]
             if flag is False:
                 sql = """
-                    INSERT INTO dbo.seguimiento_programacion (numero, fecha_programacion, usuario)
+                    INSERT INTO dbo.seguimiento_programacion (seguimiento_coti_id, numero, fecha_programacion, usuario)
                     OUTPUT INSERTED.id
-                    VALUES (:numero, :fecha_programacion, :usuario)
+                    VALUES (:seguimiento_coti_id, :numero, :fecha_programacion, :usuario)
                 """
                 result = self.db.execute(text(sql), {
+                    "seguimiento_coti_id": data_segui_coti_id,
                     "numero": data["cotizacion"],
                     "fecha_programacion": data["fecha_programacion"],
                     "usuario": data["usuario"]
@@ -777,12 +778,13 @@ class Querys:
                 FROM dbo.seguimiento_coti 
                 WHERE numero_cotizacion = :numero;
             """
-            query = self.db.execute(text(sql), {"numero": num_cot}).fetchall()
+            query = self.db.execute(text(sql), {"numero": num_cot}).fetchone()
+            
             if not query:
                 raise CustomException(
                     "Este número de cotización no tiene correo asociado."
                 )
-            return True
+            return dict(query._mapping)
 
         except CustomException as ex:
             raise CustomException(str(ex))

@@ -64,14 +64,18 @@ class Seguimiento:
             
             # Acá revisamos si la cotización ya tiene un seguimiento creado
             # desde el correo.
-            self.querys.check_seguimiento_coti_correo_exists(data["cotizacion"])
+            data_segui_coti = self.querys.check_seguimiento_coti_correo_exists(
+                data["cotizacion"])
+            
+            data_segui_coti_id = data_segui_coti["id"]
             
             # Revisamos si el seguimiento ya existe.
             segui = self.querys.check_seguimiento_exists(data["cotizacion"])
             segui_progra_id = segui.id if segui else None
             if not segui:
                 # Guardamos el seguimiento de la cotización.
-                segui_progra_id = self.querys.guardar_seguimiento(data)
+                segui_progra_id = self.querys.guardar_seguimiento(
+                    data, data_segui_coti_id)
             
             # Guardamos la historia del seguimiento.
             self.querys.guardar_historia_seguimiento(data, segui_progra_id)
